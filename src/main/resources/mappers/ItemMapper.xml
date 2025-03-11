@@ -4,8 +4,41 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="edu.unisabana.dyas.sampleprj.dao.mybatis.mappers.ItemMapper">
-
-
     
-    
+    <!-- Mapeo de Item -->
+    <resultMap id="ItemResult" type="Item">
+        <id property="id" column="id"/>
+        <result property="nombre" column="nombre"/>
+        <result property="descripcion" column="descripcion"/>
+        <result property="fechaLanzamiento" column="fechalanzamiento"/>
+        <result property="tarifaDia" column="tarifaxdia"/>
+        <result property="formatoRenta" column="formatorenta"/>
+        <result property="genero" column="genero"/>
+        <association property="tipoItem" javaType="TipoItem" resultMap="TipoItemResult" columnPrefix="ti_"/>
+    </resultMap>
+
+    <!-- Consultar un item por su ID -->
+    <select id="consultarItem" parameterType="int" resultMap="ItemResult">
+        SELECT 
+            i.id, i.nombre, i.descripcion, i.fechalanzamiento, i.tarifaxdia, i.formatorenta, i.genero,
+            ti.id AS ti_id, ti.descripcion AS ti_descripcion
+        FROM VI_ITEMS AS i
+        LEFT JOIN VI_TIPOITEM AS ti ON i.TIPOITEM_id = ti.id
+        WHERE i.id = #{id};
+    </select>
+
+    <!-- Consultar todos los items -->
+    <select id="consultarItems" resultMap="ItemResult">
+        SELECT 
+            i.id, i.nombre, i.descripcion, i.fechalanzamiento, i.tarifaxdia, i.formatorenta, i.genero,
+            ti.id AS ti_id, ti.descripcion AS ti_descripcion
+        FROM VI_ITEMS AS i
+        LEFT JOIN VI_TIPOITEM AS ti ON i.TIPOITEM_id = ti.id;
+    </select>
+
+    <!-- Insertar un nuevo item -->
+    <insert id="insertarItem" parameterType="Item">
+        INSERT INTO VI_ITEMS (nombre, descripcion, fechalanzamiento, tarifaxdia, formatorenta, genero, TIPOITEM_id)
+        VALUES (#{nombre}, #{descripcion}, #{fechaLanzamiento}, #{tarifaDia}, #{formatoRenta}, #{genero}, #{tipoItem.id});
+    </insert>
 </mapper>
