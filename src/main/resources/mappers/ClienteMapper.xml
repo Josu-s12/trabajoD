@@ -4,7 +4,70 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   
 <mapper namespace="edu.unisabana.dyas.sampleprj.dao.mybatis.mappers.ClienteMapper">
+    
+    <!-- Mapeo de Cliente -->
+    <resultMap id="ClienteResult" type="Cliente">
+        <id property="documento" column="documento"/>
+        <result property="nombre" column="nombre"/>
+        <result property="telefono" column="telefono"/>
+        <result property="direccion" column="direccion"/>
+        <result property="email" column="email"/>
+        <result property="vetado" column="vetado"/>
+        <collection property="itemsRentados" ofType="ItemRentado" resultMap="ItemRentadoResult" columnPrefix="ir_"/>
+    </resultMap>
 
+    <!-- Mapeo de ItemRentado -->
+    <resultMap id="ItemRentadoResult" type="ItemRentado">
+        <id property="id" column="ir_id"/>
+        <result property="fechaInicioRenta" column="ir_fechainiciorenta"/>
+        <result property="fechaFinRenta" column="ir_fechafinrenta"/>
+        <association property="item" javaType="Item" resultMap="ItemResult" columnPrefix="i_"/>
+    </resultMap>
 
-          	
+    <!-- Mapeo de Item -->
+    <resultMap id="ItemResult" type="Item">
+        <id property="id" column="i_id"/>
+        <result property="nombre" column="i_nombre"/>
+        <result property="descripcion" column="i_descripcion"/>
+        <result property="fechaLanzamiento" column="i_fechalanzamiento"/>
+        <result property="tarifaDia" column="i_tarifaxdia"/>
+        <result property="formatoRenta" column="i_formatorenta"/>
+        <result property="genero" column="i_genero"/>
+        <association property="tipoItem" javaType="TipoItem" resultMap="TipoItemResult" columnPrefix="ti_"/>
+    </resultMap>
+
+    <!-- Mapeo de TipoItem -->
+    <resultMap id="TipoItemResult" type="TipoItem">
+        <id property="id" column="ti_id"/>
+        <result property="descripcion" column="ti_descripcion"/>
+    </resultMap>
+
+    <!-- Consulta para obtener clientes con sus items rentados -->
+    <select id="consultarClientes" resultMap="ClienteResult">
+        SELECT 
+            c.documento, c.nombre, c.telefono, c.direccion, c.email, c.vetado,
+            ir.id AS ir_id, ir.fechainiciorenta AS ir_fechainiciorenta, ir.fechafinrenta AS ir_fechafinrenta,
+            i.id AS i_id, i.nombre AS i_nombre, i.descripcion AS i_descripcion, i.fechalanzamiento AS i_fechalanzamiento,
+            i.tarifaxdia AS i_tarifaxdia, i.formatorenta AS i_formatorenta, i.genero AS i_genero,
+            ti.id AS ti_id, ti.descripcion AS ti_descripcion
+        FROM VI_CLIENTES AS c
+        LEFT JOIN VI_ITEMRENTADO AS ir ON c.documento = ir.CLIENTES_documento
+        LEFT JOIN VI_ITEMS AS i ON ir.ITEMS_id = i.id
+        LEFT JOIN VI_TIPOITEM AS ti ON i.TIPOITEM_id = ti.id;
+    </select>
+
+    <!-- Consultar cliente por ID -->
+    <select id="consultarCliente" parameterType="int" resultMap="ClienteResult">
+        SELECT 
+            c.documento, c.nombre, c.telefono, c.direccion, c.email, c.vetado,
+            ir.id AS ir_id, ir.fechainiciorenta AS ir_fechainiciorenta, ir.fechafinrenta AS ir_fechafinrenta,
+            i.id AS i_id, i.nombre AS i_nombre, i.descripcion AS i_descripcion, i.fechalanzamiento AS i_fechalanzamiento,
+            i.tarifaxdia AS i_tarifaxdia, i.formatorenta AS i_formatorenta, i.genero AS i_genero,
+            ti.id AS ti_id, ti.descripcion AS ti_descripcion
+        FROM VI_CLIENTES AS c
+        LEFT JOIN VI_ITEMRENTADO AS ir ON c.documento = ir.CLIENTES_documento
+        LEFT JOIN VI_ITEMS AS i ON ir.ITEMS_id = i.id
+        LEFT JOIN VI_TIPOITEM AS ti ON i.TIPOITEM_id = ti.id
+        WHERE c.documento = #{id};
+    </select>
 </mapper>
